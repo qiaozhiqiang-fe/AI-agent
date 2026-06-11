@@ -12,6 +12,15 @@
 - 后端默认端口为 `3000`，可通过 `backend/.env` 中的 `PORT` 覆盖；示例配置见 `backend/.env.example`。
 - 根目录 `package.json` 提供跨前后端的聚合脚本，例如 `npm run check`。
 
+## 规则分层
+
+- 根目录 `AGENTS.md` 负责项目通用规则。
+- `backend/AGENTS.md` 和 `frontend/AGENTS.md` 负责模块局部规则。
+- `docs/ai-development-workflow.md` 负责 AI 开发流程。
+- `docs/code-review.md` 负责 review 标准。
+- `docs/prompts/` 负责团队复用 Prompt 模板。
+- 进入更深目录工作时，优先遵守更靠近当前文件的 `AGENTS.md`。
+
 ## 沟通语言
 
 - 日常沟通使用中文，优先说明结论、改动和验证结果。
@@ -129,6 +138,12 @@ npm run build
 - PR 描述必须基于实际 diff，不写与本次变更无关的内容。
 - 验证结果只填写真实执行过的命令和结果。
 - 如果存在未验证项、已知风险或后续事项，要写在“风险与影响”或“备注”中。
+
+## Review 规范
+
+- 默认按 `docs/code-review.md` 执行代码评审。
+- review 输出优先给 findings，再给剩余风险或验证缺口。
+- 发现问题时，优先指出正确性、回归和兼容性风险，而不是风格问题。
 
 ## Git 与提交
 
