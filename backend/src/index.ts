@@ -14,6 +14,17 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
+app.get('/api/example', (_req, res) => {
+  res.json({
+    code: 0,
+    message: '前后端调用成功',
+    data: {
+      appName: 'AI Agent',
+      serverTime: new Date().toISOString(),
+    },
+  });
+});
+
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
