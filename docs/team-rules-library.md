@@ -18,9 +18,11 @@
 - `frontend/AGENTS.md`：前端局部规则。
 - `docs/ai-development-workflow.md`：AI 编码自动化流程。
 - `docs/code-review.md`：代码评审标准。
+- `docs/pull-request-process.md`：分支与 PR 流程。
 - `docs/prompts/`：团队复用 Prompt 模板。
 - `.github/ISSUE_TEMPLATE/`：需求和缺陷输入模板。
 - `.github/pull_request_template.md`：PR 描述模板。
+- `.githooks/pre-push`：本地主分支推送拦截。
 
 ## 维护原则
 
