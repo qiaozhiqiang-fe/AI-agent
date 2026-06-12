@@ -1,99 +1,98 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
-import { http } from '@/services/http';
+import ChatComposer from '@/components/chat/ChatComposer.vue';
+import ChatEmptyState from '@/components/chat/ChatEmptyState.vue';
+import ChatMessageList from '@/components/chat/ChatMessageList.vue';
+import ChatSidebar from '@/components/chat/ChatSidebar.vue';
+import { useChat } from '@/composables/use-chat';
 
-type ExampleResponse = {
-  code: number;
-  message: string;
-  data: {
-    appName: string;
-    serverTime: string;
-  };
-};
-
-const loading = ref(true);
-const errorMessage = ref('');
-const example = ref<ExampleResponse | null>(null);
-
-onMounted(async () => {
-  try {
-    const { data } = await http.get<ExampleResponse>('/example');
-    example.value = data;
-  } catch {
-    errorMessage.value = '接口调用失败，请检查后端服务是否已启动。';
-  } finally {
-    loading.value = false;
-  }
-});
+const {
+  inputText,
+  messages,
+  copiedMessageId,
+  scrollContainer,
+  isNearBottom,
+  mode,
+  sidebarOpen,
+  groupedHistory,
+  isStreaming,
+  inputTooLong,
+  canSend,
+  pageStatus,
+  sendMessage,
+  retryMessage,
+  cancelStream,
+  newConversation,
+  chooseExample,
+  copyMessage,
+  onScroll,
+  scrollToBottom,
+  toggleMode,
+  setMode,
+  setSidebarOpen,
+} = useChat();
 </script>
 
 <template>
-  <main class="min-h-screen bg-slate-50 px-6 py-10 text-slate-900">
-    <section class="mx-auto max-w-4xl">
-      <h1 class="text-3xl font-semibold">
-        Frontend
-      </h1>
-      <p class="mt-3 text-slate-600">
-        Vue 3 + TypeScript + Vite 基础项目已就绪。
-      </p>
+  <main class="flex h-screen overflow-hidden bg-[#f8f9fc] text-[#202532]">
+    <ChatSidebar
+      :grouped-history="groupedHistory"
+      :sidebar-open="sidebarOpen"
+      @close-sidebar="setSidebarOpen(false)"
+      @new-conversation="newConversation"
+    />
 
-      <div class="mt-8 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 class="text-lg font-medium">
-          接口调用验证
-        </h2>
-
-        <p
-          v-if="loading"
-          class="mt-4 text-slate-500"
+    <section class="flex min-w-0 flex-1 flex-col bg-[#fbfcff]">
+      <header class="flex h-16 items-center justify-between px-4 lg:hidden">
+        <button
+          class="rounded-full border border-[#dbe2ff] px-3 py-1.5 text-sm font-semibold text-[#3f6bff]"
+          type="button"
+          @click="setSidebarOpen(!sidebarOpen)"
         >
-          正在请求后端示例接口...
-        </p>
-
-        <p
-          v-else-if="errorMessage"
-          class="mt-4 text-red-600"
+          菜单
+        </button>
+        <span class="font-semibold text-[#3f6bff]">deepseek</span>
+        <button
+          class="rounded-full border border-[#dbe2ff] px-3 py-1.5 text-sm font-semibold text-[#3f6bff]"
+          type="button"
+          @click="newConversation"
         >
-          {{ errorMessage }}
-        </p>
+          新对话
+        </button>
+      </header>
 
-        <dl
-          v-else-if="example"
-          class="mt-4 grid gap-3 text-sm"
-        >
-          <div class="flex gap-3">
-            <dt class="w-24 text-slate-500">
-              状态码
-            </dt>
-            <dd class="font-medium">
-              {{ example.code }}
-            </dd>
-          </div>
-          <div class="flex gap-3">
-            <dt class="w-24 text-slate-500">
-              返回消息
-            </dt>
-            <dd
-              class="font-medium text-emerald-700"
-            >
-              {{ example.message }}
-            </dd>
-          </div>
-          <div
-            class="flex gap-3"
-          >
-            <dt class="w-24 text-slate-500">
-              应用名称
-            </dt>
-            <dd>{{ example.data.appName }}</dd>
-          </div>
-          <div class="flex gap-3">
-            <dt class="w-24 text-slate-500">
-              服务时间
-            </dt>
-            <dd>{{ example.data.serverTime }}</dd>
-          </div>
-        </dl>
+      <div
+        ref="scrollContainer"
+        class="relative flex-1 overflow-y-auto px-4 pb-6 pt-6"
+        @scroll="onScroll"
+      >
+        <ChatEmptyState
+          v-if="messages.length === 0"
+          :mode="mode"
+          @choose-example="chooseExample"
+          @set-mode="setMode"
+        />
+        <ChatMessageList
+          v-else
+          :copied-message-id="copiedMessageId"
+          :is-near-bottom="isNearBottom"
+          :messages="messages"
+          @copy="copyMessage"
+          @retry="retryMessage"
+          @scroll-to-bottom="scrollToBottom"
+        />
       </div>
+
+      <ChatComposer
+        v-model:input-text="inputText"
+        :can-send="canSend"
+        :input-too-long="inputTooLong"
+        :is-streaming="isStreaming"
+        :mode="mode"
+        :page-status="pageStatus"
+        @cancel="cancelStream"
+        @send="sendMessage()"
+        @toggle-mode="toggleMode"
+      />
     </section>
   </main>
 </template>
