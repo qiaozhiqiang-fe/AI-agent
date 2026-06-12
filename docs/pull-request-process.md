@@ -9,7 +9,8 @@
 3. 推送功能分支到远端。
 4. 基于 `.github/pull_request_template.md` 创建 Pull Request。
 5. 在 PR 中填写真实背景、改动内容、验证结果、风险与影响、备注。
-6. 完成 review 后再合并到 `main`。
+6. 等待 GitHub Actions `CI` 检查通过。
+7. 完成 review 后再合并到 `main`。
 
 ## 分支建议
 
@@ -28,6 +29,7 @@
 - 本地 `.githooks/pre-push` 会阻止直接从 `main` 或 `master` 执行 `git push`。
 - 本地 `.githooks/commit-msg` 会检查 Conventional Commits 提交信息。
 - 推送前会执行 `scripts/check-rules.mjs` 检查分支名和文件命名。
+- GitHub Actions 会在面向 `main` 的 PR 上执行基础 CI，运行 `npm run check`。
 - PR 描述默认使用 `.github/pull_request_template.md`。
 - 直接推送功能分支是允许的；禁止的是把改动直接推到受保护主分支。
 
