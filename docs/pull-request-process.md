@@ -16,11 +16,18 @@
 - 文档或流程类改动：`docs/<topic>`
 - 功能改动：`feature/<topic>`
 - 缺陷修复：`fix/<topic>`
+- 重构：`refactor/<topic>`
+- 测试：`test/<topic>`
+- 工具或维护：`chore/<topic>`
 - AI 代理协作改动：`codex/<topic>`
+
+详细分支和提交规范见 `docs/git-workflow.md`。
 
 ## 约束说明
 
 - 本地 `.githooks/pre-push` 会阻止直接从 `main` 或 `master` 执行 `git push`。
+- 本地 `.githooks/commit-msg` 会检查 Conventional Commits 提交信息。
+- 推送前会执行 `scripts/check-rules.mjs` 检查分支名和文件命名。
 - PR 描述默认使用 `.github/pull_request_template.md`。
 - 直接推送功能分支是允许的；禁止的是把改动直接推到受保护主分支。
 
@@ -39,4 +46,3 @@ git push origin codex/<topic>
 ```
 
 如果使用 GitHub Web 创建 PR，仓库会自动带出 PR 模板。
-

@@ -9,4 +9,4 @@ if [ "$branch" = "main" ] || [ "$branch" = "master" ]; then
   exit 1
 fi
 
-exit 0
+node scripts/check-rules.mjs

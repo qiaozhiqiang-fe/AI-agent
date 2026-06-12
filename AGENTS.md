@@ -17,6 +17,8 @@
 - 根目录 `AGENTS.md` 负责项目通用规则。
 - `backend/AGENTS.md` 和 `frontend/AGENTS.md` 负责模块局部规则。
 - `docs/ai-development-workflow.md` 负责 AI 开发流程。
+- `docs/coding-standards.md` 负责工程代码、命名和目录规范。
+- `docs/git-workflow.md` 负责分支、提交和 PR 协作规范。
 - `docs/code-review.md` 负责 review 标准。
 - `docs/prompts/` 负责团队复用 Prompt 模板。
 - 进入更深目录工作时，优先遵守更靠近当前文件的 `AGENTS.md`。
@@ -49,6 +51,7 @@
 
 ## 代码规范
 
+- 完整工程规范见 `docs/coding-standards.md`。
 - 遵循现有 TypeScript 风格：ESM imports、单引号、分号。
 - 公共接口、API 响应、组件状态等应使用明确的类型。
 - 后端路由、服务逻辑和配置应随规模增长逐步拆分，避免把所有逻辑长期堆在 `backend/src/index.ts`。
@@ -149,9 +152,11 @@ npm run build
 
 ## Git 与提交
 
+- 完整 Git 协作规范见 `docs/git-workflow.md`。
 - 提交前先检查 `git status`，区分自己改动和用户已有改动。
 - 不回滚用户未授权的修改。
-- 提交信息使用简洁中文或常见英文 conventional commit，保持含义清楚。
+- 提交信息使用 Conventional Commits 格式，例如 `docs: add coding standards`。
+- 分支名使用 `feature/`、`fix/`、`docs/`、`refactor/`、`test/`、`chore/` 或 `codex/` 前缀，topic 使用小写短横线。
 - 依赖变更需要同时提交对应的 lockfile；没有依赖变更时不要改 lockfile。
 - 推送前确认目标远端和分支，不默认推送到任意远端。
 - 默认禁止直推 `main`；先创建功能分支，再推送分支并发起 PR。
@@ -162,7 +167,7 @@ npm run build
 2. 完成需求拆解并确认最小改动范围。
 3. 修改前简短说明即将编辑哪些文件。
 4. 修改后执行与变更匹配的验证。
-5. 检查 `git status --short` 和必要的 diff。
+5. 执行 `npm run check:rules`，并检查 `git status --short` 和必要的 diff。
 6. 在功能分支提交并推送，使用 PR 模板发起 Pull Request。
 7. 最终回复说明改了什么、验证了什么、是否还有未覆盖风险，并在需要时给出 PR 描述。
 

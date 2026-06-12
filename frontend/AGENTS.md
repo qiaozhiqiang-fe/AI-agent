@@ -12,6 +12,9 @@
 ## 前端约定
 
 - 当前前端为 Vue 3 + TypeScript + Vite + Tailwind CSS。
+- 完整前端代码、命名和目录规范见 `docs/coding-standards.md`。
+- Vue 组件文件使用 `PascalCase.vue`，TypeScript 源码文件使用 `kebab-case.ts`。
+- 默认使用 Composition API 和 `<script setup lang="ts">`。
 - 优先使用组合式 API 和明确类型，不把请求、视图和复杂数据转换混在一起。
 - 接口访问统一走 `frontend/src/services/`，不要在多个组件里散落重复请求配置。
 - 页面状态至少考虑 `loading`、`error`、`empty` 和正常数据态中与本次需求相关的部分。
@@ -20,6 +23,7 @@
 ## 样式约定
 
 - 先复用已有 Tailwind 风格和间距节奏，再新增样式。
+- 优先使用 Tailwind 工具类；全局 CSS 只承载通用 reset、字体、基础布局变量和 Tailwind 入口。
 - 不为了局部改动引入新的视觉体系或大面积重写页面结构。
 - 文本不能出现明显溢出、遮挡或窄屏布局崩坏。
 
@@ -38,4 +42,3 @@ npm run build
 - 改动影响的页面或组件
 - 接口依赖是否变化
 - 是否做过手动联调或视觉检查
-
