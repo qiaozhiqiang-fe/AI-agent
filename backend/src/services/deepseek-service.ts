@@ -6,7 +6,6 @@ import type {
 } from '../types/chat.types.js';
 
 const defaultTimeoutMs = 60000;
-const mockResponseDelayMs = 28;
 
 type DeepSeekChunk = {
   choices?: Array<{
@@ -24,7 +23,12 @@ type DeepSeekErrorResponse = {
 };
 
 export class DeepSeekServiceError extends Error {
-  public readonly code = 'MODEL_REQUEST_FAILED';
+  constructor(
+    public readonly code: string,
+    message: string,
+  ) {
+    super(message);
+  }
 }
 
 export function writeSse(
@@ -60,47 +64,20 @@ export async function streamChat(
   response: Response,
   clientSignal: AbortSignal,
 ) {
+  if (!process.env.DEEPSEEK_API_KEY?.trim()) {
+    throw new DeepSeekServiceError(
+      'MODEL_API_KEY_MISSING',
+      'DeepSeek API Key 未配置，请先在 backend/.env 中配置 DEEPSEEK_API_KEY。',
+    );
+  }
+
   const conversationId =
     request.conversationId || crypto.randomUUID();
   const messageId = crypto.randomUUID();
 
   writeSse(response, 'start', { conversationId, messageId });
 
-  if (!process.env.DEEPSEEK_API_KEY?.trim()) {
-    await streamMockResponse(request, response, clientSignal);
-    return;
-  }
-
   await streamDeepSeekResponse(request, response, clientSignal);
-}
-
-async function streamMockResponse(
-  request: ChatStreamRequest,
-  response: Response,
-  signal: AbortSignal,
-) {
-  const previousTurns = Math.floor((request.context?.length ?? 0) / 2);
-  const mockText = [
-    '当前运行在本地 Mock 流式模式。',
-    previousTurns > 0
-      ? `我已接收到前面约 ${previousTurns} 轮对话上下文。`
-      : '这是当前会话的第一轮问题。',
-    `你刚才的问题是：“${request.message}”`,
-    '配置 DEEPSEEK_API_KEY 后，服务会自动切换到真实 DeepSeek 流式接口。',
-  ].join('\n\n');
-
-  for (const chunk of splitText(mockText, 5)) {
-    if (signal.aborted || response.writableEnded) {
-      return;
-    }
-
-    writeSse(response, 'delta', { content: chunk });
-    await delay(mockResponseDelayMs, signal);
-  }
-
-  if (!signal.aborted && !response.writableEnded) {
-    writeSse(response, 'done', { finishReason: 'stop' });
-  }
 }
 
 async function streamDeepSeekResponse(
@@ -126,7 +103,7 @@ async function streamDeepSeekResponse(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: process.env.DEEPSEEK_MODEL || 'deepseek-chat',
+        model: process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash',
         messages: buildMessages(request),
         stream: true,
       }),
@@ -138,12 +115,16 @@ async function streamDeepSeekResponse(
         .json()
         .catch(() => ({}))) as DeepSeekErrorResponse;
       throw new DeepSeekServiceError(
+        'MODEL_REQUEST_FAILED',
         errorBody.error?.message || 'DeepSeek request failed.',
       );
     }
 
     if (!upstreamResponse.body) {
-      throw new DeepSeekServiceError('DeepSeek stream is unavailable.');
+      throw new DeepSeekServiceError(
+        'MODEL_STREAM_UNAVAILABLE',
+        'DeepSeek stream is unavailable.',
+      );
     }
 
     await pipeDeepSeekStream(upstreamResponse.body, response, signal);
@@ -157,10 +138,16 @@ async function streamDeepSeekResponse(
     }
 
     if (timeoutController.signal.aborted) {
-      throw new DeepSeekServiceError('DeepSeek request timed out.');
+      throw new DeepSeekServiceError(
+        'MODEL_REQUEST_TIMEOUT',
+        'DeepSeek request timed out.',
+      );
     }
 
-    throw new DeepSeekServiceError('DeepSeek request failed.');
+    throw new DeepSeekServiceError(
+      'MODEL_REQUEST_FAILED',
+      'DeepSeek request failed.',
+    );
   } finally {
     clearTimeout(timeout);
   }
@@ -215,29 +202,4 @@ async function pipeDeepSeekStream(
       }
     }
   }
-}
-
-function splitText(text: string, size: number) {
-  const chunks: string[] = [];
-
-  for (let index = 0; index < text.length; index += size) {
-    chunks.push(text.slice(index, index + size));
-  }
-
-  return chunks;
-}
-
-function delay(ms: number, signal: AbortSignal) {
-  return new Promise<void>((resolve) => {
-    const timeout = setTimeout(resolve, ms);
-
-    signal.addEventListener(
-      'abort',
-      () => {
-        clearTimeout(timeout);
-        resolve();
-      },
-      { once: true },
-    );
-  });
 }
