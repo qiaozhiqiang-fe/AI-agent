@@ -1,0 +1,12 @@
+#!/bin/sh
+
+branch="$(git branch --show-current 2>/dev/null)"
+
+if [ "$branch" = "main" ] || [ "$branch" = "master" ]; then
+  echo "Push blocked: direct push to $branch is disabled in this repository."
+  echo "Create a feature branch, push that branch, and open a pull request."
+  echo "Use the PR template at .github/pull_request_template.md."
+  exit 1
+fi
+
+node scripts/check-rules.mjs
