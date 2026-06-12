@@ -23,16 +23,16 @@
 PORT=3000
 DEEPSEEK_API_KEY=
 DEEPSEEK_API_BASE_URL=https://api.deepseek.com
-DEEPSEEK_MODEL=deepseek-chat
+DEEPSEEK_MODEL=deepseek-v4-flash
 DEEPSEEK_REQUEST_TIMEOUT_MS=60000
 DEEPSEEK_SYSTEM_PROMPT=你是一名专业、准确的中文 AI 助手。
 ```
 
 字段说明：
 
-- `DEEPSEEK_API_KEY`：DeepSeek API Key。为空时后端自动启用本地 Mock 流式响应，方便无密钥联调。
+- `DEEPSEEK_API_KEY`：DeepSeek API Key。必填；为空时接口会返回 `MODEL_API_KEY_MISSING`，不会返回 Mock 数据。
 - `DEEPSEEK_API_BASE_URL`：DeepSeek API Base URL，默认 `https://api.deepseek.com`。
-- `DEEPSEEK_MODEL`：模型名称，默认 `deepseek-chat`。
+- `DEEPSEEK_MODEL`：模型名称，默认 `deepseek-v4-flash`。
 - `DEEPSEEK_REQUEST_TIMEOUT_MS`：上游请求超时时间。
 - `DEEPSEEK_SYSTEM_PROMPT`：服务端系统提示词，用于承载通用回答规则；后续可接入钉钉产品文档中的业务流程、话术和合规限制。
 
@@ -85,7 +85,7 @@ Content-Type: application/json
 
 ```json
 {
-  "model": "deepseek-chat",
+  "model": "deepseek-v4-flash",
   "messages": [
     {
       "role": "system",
@@ -149,10 +149,11 @@ data: {}
 
 ## 本地联调方式
 
-1. 不配置 `DEEPSEEK_API_KEY` 时，启动后端会进入 Mock 流式模式。
-2. 配置真实 `DEEPSEEK_API_KEY` 后，后端自动切换到 DeepSeek 流式接口。
-3. 前端不展示模型名称、请求耗时和 token usage。
-4. 用户取消生成时，前端会中断当前请求，并保留已经生成的部分内容。
+1. 在 `backend/.env` 中配置真实 `DEEPSEEK_API_KEY`。
+2. 启动后端后，`/api/chat/stream` 会直接调用 DeepSeek 流式接口。
+3. 不配置 `DEEPSEEK_API_KEY` 时，接口返回 `MODEL_API_KEY_MISSING`，不会返回 Mock 数据。
+4. 前端不展示模型名称、请求耗时和 token usage。
+5. 用户取消生成时，前端会中断当前请求，并保留已经生成的部分内容。
 
 启动命令：
 
