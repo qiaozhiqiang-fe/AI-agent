@@ -78,6 +78,7 @@ npm run check
 
 - PR 标题要清楚说明意图。
 - PR 正文必须基于 `.github/pull_request_template.md`。
+- PR 必须通过 GitHub Actions `CI` 检查后再合并。
 - 验证结果只填写真实执行过的命令和结果。
 - 未验证项、已知风险和后续事项必须写明。
 - review 发现的问题解决后再合并。
@@ -91,3 +92,14 @@ npm run check
 - `scripts/check-rules.mjs`：检查当前分支名和项目文件命名。
 
 本地 hooks 不能替代 GitHub 分支保护。团队协作时仍建议在远端开启 branch protection 或 rulesets，要求 PR、status checks 和 review 后才能合并。
+
+## GitHub Actions
+
+仓库使用 `.github/workflows/ci.yml` 执行基础 CI：
+
+- 触发条件：面向 `main` 的 Pull Request，以及推送到 `main`。
+- 运行环境：Node.js 20。
+- 依赖安装：分别执行 `npm ci --prefix backend` 和 `npm ci --prefix frontend`。
+- 检查命令：执行根目录 `npm run check`，覆盖规则检查、后端 lint/build 和前端 lint/build。
+
+远端建议把 `CI / Rules, lint, and build` 设置为 `main` 的必需 status check。
